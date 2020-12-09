@@ -1,0 +1,53 @@
+// Final: Blooming Rose
+
+// declaring variables to deal with audio input
+let mic;
+let micLevel;
+
+// setting number of petals andinitial degree
+// n petals if n is odd, and 2n petals if n is even
+let n = 2;
+let d = 39;
+
+function setup() {
+  createCanvas(680, 500);
+  angleMode(DEGREES);    // set angle mode to degrees
+   
+  // get audio input from computer mic and turn mic on
+  mic = new p5.AudioIn();
+  mic.start();
+}
+
+function draw() {
+  background(0);
+  frameRate(20);
+  translate(width/2, height/2);
+  
+  // get amplitude
+  micLevel = mic.getLevel();
+  
+  // increment n and d by mapped/adjusted amplitude
+  n += map(micLevel,0,1,0,0.01)
+  d += map(micLevel,0,1,0,0.05)
+  
+  // calling function to draw the rose
+  drawFlower();
+}
+
+// function to draw the rose
+function drawFlower() {
+  stroke(120,20,255);
+  noFill();
+  
+  // record vertices for the rose shape
+  beginShape();
+  strokeWeight(1);
+  for (let i = 0; i < 361; i++) {
+    let k = i * d;
+    let r = 220 * sin(n*k) * map(micLevel,0,1,1,25); // mapped value adjusts r
+    let x = r * cos(k);
+    let y = r * sin(k);
+    vertex(x,y);    
+  }
+  endShape();
+}
