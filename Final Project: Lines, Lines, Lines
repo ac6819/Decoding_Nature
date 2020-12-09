@@ -5,7 +5,7 @@ let mic;
 let micLevel;
 
 // declaring variables for grid
-let tileCount = 20;
+let tileCount = 24;
 let seed;
 
 function setup() {
@@ -60,8 +60,8 @@ function drawLines(){
       if (toggle == 1) {
         stroke(50 + a*50,20,255 - a*50)
         strokeWeight(5+a*2);
-        line(posX + tileCount*a + r, posY + width/tileCount*a + r,
-             posX + height/tileCount*a + r, posY + tileCount*a + r);
+        line(posX + r, posY + width/tileCount*a + r,
+             posX + height/tileCount*a + r, posY + r);
       }
     }
   }
