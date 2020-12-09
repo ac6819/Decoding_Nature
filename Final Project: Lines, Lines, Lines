@@ -1,0 +1,68 @@
+// Final: Lines, Lines, Lines
+
+// declaring variables to deal with audio input
+let mic;
+let micLevel;
+
+// declaring variables for grid
+let tileCount = 20;
+let seed;
+
+function setup() {
+  createCanvas(680, 500);
+  angleMode(DEGREES);      // set angle mode to degrees
+  strokeCap(ROUND);        // make the ends of the strokes round
+  
+  // get audio input from computer mic and turn mic on
+  mic = new p5.AudioIn();
+  mic.start();
+  
+  // set seed
+  seed = random(0,100)
+}
+
+function draw() {
+  background(0);
+  noFill();
+  randomSeed(seed);   // initializes the pseudo-random number generator
+
+  // get amplitude
+  micLevel = mic.getLevel();
+
+  drawLines();  // calling function to draw lines
+}
+
+function drawLines(){
+  for (let gridX=0; gridX<tileCount; gridX++) {
+    for (let gridY=0; gridY<tileCount; gridY++) {
+
+      // to determine position of line in each grid
+      let posX = width/tileCount*gridX;
+      let posY = height/tileCount*gridY;
+      
+      let toggle = int(random(0,2));   // to determine line color in grid
+      
+      let a = map(micLevel,0,1,0,10)   // mapping mic level
+      let r = random(-5,5)             // generating random numbers
+
+    // draw line based on toggle
+    // position line starts have some randomness (r) to it
+    // length of line is dynamic and depends on amplitude
+      
+      // if toggle is 0, draw line from top left corner (more purple/pink)
+      if (toggle == 0) {
+        stroke(180 + a*50,20,255 - a*50)
+        strokeWeight(5+a*2);
+        line(posX + r, posY + r, 
+             posX + width/tileCount*a + r, posY + height/tileCount*a + r);
+      }
+      // if toggle is 1, draw line from top right corner (more blue)
+      if (toggle == 1) {
+        stroke(50 + a*50,20,255 - a*50)
+        strokeWeight(5+a*2);
+        line(posX + tileCount*a + r, posY + width/tileCount*a + r,
+             posX + height/tileCount*a + r, posY + tileCount*a + r);
+      }
+    }
+  }
+}
