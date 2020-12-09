@@ -42,7 +42,7 @@ function drawLines(){
       
       let toggle = int(random(0,2));   // to determine line color in grid
       
-      let a = map(micLevel,0,1,0,10)   // mapping mic level
+      let a = map(micLevel,0,1,0,5)   // mapping mic level
       let r = random(-5,5)             // generating random numbers
 
     // draw line based on toggle
@@ -52,14 +52,14 @@ function drawLines(){
       // if toggle is 0, draw line from top left corner (more purple/pink)
       if (toggle == 0) {
         stroke(180 + a*50,20,255 - a*50)
-        strokeWeight(5+a*2);
+        strokeWeight(4+a*2);
         line(posX + r, posY + r, 
              posX + width/tileCount*a + r, posY + height/tileCount*a + r);
       }
       // if toggle is 1, draw line from top right corner (more blue)
       if (toggle == 1) {
         stroke(50 + a*50,20,255 - a*50)
-        strokeWeight(5+a*2);
+        strokeWeight(4+a*2);
         line(posX + r, posY + width/tileCount*a + r,
              posX + height/tileCount*a + r, posY + r);
       }
