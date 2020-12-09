@@ -1,0 +1,107 @@
+// Final: Fractal Explosion
+
+// declaring variables to deal with audio input
+let mic;
+let micLevel;
+
+function setup() {
+  createCanvas(680,500);
+  background(0);
+  
+  // get audio input from computer mic and turn mic on
+  mic = new p5.AudioIn();
+  mic.start();
+}
+
+function draw() {
+  background(0);
+  translate(width/2,height);
+  
+  // get amplitude
+  micLevel = mic.getLevel();
+  
+  // map/adjust amplitude
+  adj_micLevel = map(micLevel*5, 0, 0.5, 3, 9)
+  
+  // set angle and size and scale
+  a = 2/3;
+  s = 120;
+  theta = PI/adj_micLevel;
+
+  // calling function to draw each tree (3 total)
+  strokeWeight(3);
+  stroke(200,20,200);    // pink
+  branch3(s,a,theta);
+  
+  translate(0,s);
+  stroke(100,20,220);    // purple
+  branch2(s,a,theta);
+  
+  translate(0,s);
+  stroke(40,20,220);     // blue
+  strokeWeight(2);
+  branch(s,a,theta);
+}
+
+// function to draw tree 1 (blue)
+function branch(s,a,theta) {
+  line(0, 0, 0, -s);
+  translate(0, -s);    // translate branch by size
+  
+  s*=a;
+ 
+  // recursion function to draw next branch
+  if (s > 2) {
+    push();
+      rotate(theta);
+      branch(s,a,theta);
+    pop();
+ 
+    push();
+      rotate(-theta);
+      branch(s,a,theta);
+    pop();
+  }
+}
+
+// function to draw tree 1 (purple)
+function branch2(s,a,theta) {
+  line(0, 0, 0, -s);
+  translate(0, -s-10);     // translate branch by size+10
+  
+  s*=a;
+ 
+  // recursion function to draw next branch
+  if (s > 2) {
+    push();
+      rotate(theta);
+      branch2(s,a,theta);
+    pop();
+ 
+    push();
+      rotate(-theta);
+      branch2(s,a,theta);
+    pop();
+  }
+}
+
+// function to draw tree 1 (pink)
+function branch3(s,a,theta) {
+  line(0, 0, 0, -s);
+  translate(0, -s-20);     // translate branch by size+20
+  
+  s*=a;
+ 
+  // recursion function to draw next branch
+  if (s > 2) {
+    push();
+      rotate(theta);
+      branch3(s,a,theta);
+    pop();
+ 
+    push();
+      rotate(-theta);
+      branch3(s,a,theta);
+    pop();
+  }
+}
