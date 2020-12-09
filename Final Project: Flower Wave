@@ -1,0 +1,54 @@
+// Final: Flower Wave
+
+// declaring variables to deal with audio input
+let mic;
+let micLevel;
+
+// setting number of petals and initial degree
+let n = 21;
+let d = 50;
+
+function setup() {
+  createCanvas(680, 500);
+  background(0);
+  angleMode(DEGREES);    // set angle mode to degrees
+
+  // get audio input from computer mic and turn mic on
+  mic = new p5.AudioIn();
+  mic.start();
+}
+
+function draw() {
+  background(0,0,0,20);
+  frameRate(20);
+  translate(width/2, height/2);
+  
+  // get amplitude
+  micLevel = mic.getLevel();
+  
+  // increment d by mapped/adjusted amplitude
+  d += map(micLevel,0,1,0,0.01)
+  
+  // calling function to draw the rose
+  drawFlower();
+}
+
+// function to draw the rose
+function drawFlower() {
+  //stroke(220,20,100);
+  let a = map(micLevel,0,1,0,20)
+  stroke(50 + a*50,20,255 - a*50)
+  noFill();
+  
+  // record vertices for the rose shape
+  beginShape();
+  strokeWeight(1);
+  for (let i = 0; i < 361; i++) {
+    let k = i * d;
+    let r = 220 * sin(n*k);
+    let x = r * cos(k);
+    let y = r * sin(k);
+    vertex(x,y);    
+  }
+  endShape();
+}
