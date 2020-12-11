@@ -37,7 +37,7 @@ function draw() {
 function drawFlower() {
   //stroke(220,20,100);
   let a = map(micLevel,0,1,0,20)
-  stroke(50 + a*50,20,255 - a*50)
+  stroke(50 + a*20,20,255 - a*20)
   noFill();
   
   // record vertices for the rose shape
