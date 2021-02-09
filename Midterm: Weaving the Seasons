@@ -1,0 +1,248 @@
+/*
+Weaving the Seasons
+Ariya Chaloemtoem
+
+The circle is in the center of the screen and is drawn using a spinning square that changes between two colors with a mouse click. The direction of the spin is always clockwise (intentional). Horizontal and Vertical lines (+ a bit of randomness added to make it slightly slanted) in the color of the dots on the pendulum is drawn every 1/20th of a second. Every 1/30th of a second a horizontal and vertical line in the color of the background is also drawn at the position of the mouse to uncrowd the two colored lines. The shift button can be used to switch to the next season and reset the background.
+
+I believe there are a few ways this that piece can be interpreted but I would like to leave it to everyone's imagination.
+*/
+
+let buffer;    // to be able to draw ontop of the refreshing background
+
+// declaring colors
+let season;     // season variable (colors depends on season)
+let colSq;      // color of square fill
+let colAlt1;    // alternating color 1
+let colAlt2;    // alternating color 2
+let colBg;      // background color
+
+// declaring variables for the spinSquare() function
+let deg = 0;         // spin degree
+let spin = 1         // spin increment (direction, positive = clockwise)
+let col;             // color of spin square stroke
+let sqDiam;          // diameter of the circle created by the rotating square
+
+// declaring variables for the pendulum() function
+let r1 = 125;            // radius (length) of arm 1
+let r2 = 125;            // radius (length) of arm 2
+let m1 = 10;             // mass (size) of bob 1
+let m2 = 10;             // mass (size) of bob 2
+let mCirc = 10;          // mass (size) of bob moving along circle circumference
+let a1, a2;              // angle of arm 1 and 2
+let a1_v = 0;            // angular velocity of arm 1
+let a2_v = 0;            // angular velocity of arm 2
+let g = 0.25;            // gravity
+let colCirc;             // color of mCirc
+let cx, cy;              // x and y position of mCirc
+let x1, y1, x2, y2;      // x and y position of bob 1 and 2
+
+function setup() {
+  createCanvas(650,650);
+  frameRate(60);
+  
+  // randomly select initializing season
+  season = random(['winter', 'spring', 'summer', 'fall'])
+  selectSeason();
+  
+  // setting position of mCirc
+  cx = width/2 + 60
+  cy = height/2 + 60
+  
+  // setting angle of arm 1 and 2
+  a1 = PI/2
+  a2 = PI/2
+  
+  // creating buffer
+  buffer = createGraphics(width, height);
+  buffer.background(colBg);
+  
+  // creating initializing circle in the middle
+  sqDiam = sqrt(7200)*2    // diameter of circle drawn with 60x60 rotating square
+  buffer.strokeWeight(4)
+  buffer.stroke(colAlt1)
+  buffer.fill(colAlt1)
+  buffer.circle(width/2,height/2, sqDiam+1);
+}
+
+function draw() {
+  // drawing the buffer
+  imageMode(CORNER);
+  image(buffer, 0, 0, width, height);
+  
+  // calling functions to draw
+  spinSquare();
+  pendulum();
+  drawLine();
+}
+
+// function to set the season colors
+function selectSeason() {
+  if (season == 'winter'){
+    colSq = '#eadbd4'
+    colAlt1 = '#f1ece6'
+    colAlt2 = '#1f4b8e'
+    colBg = '#adbccd'
+  } else if (season == 'spring'){
+    colSq = '#ff91dd'
+    colAlt1 = '#dff9cc'
+    colAlt2 = '#8ae33f'
+    colBg = '#b6ec90'
+  } else if (season == 'summer'){
+    colSq = '#fb7340'
+    colAlt1 = '#fcf936'
+    colAlt2 = '#53e4d7'
+    colBg = '#acfbf6'
+  } else if (season == 'fall'){
+    colSq = '#823324'
+    colAlt1 = '#ba3d20'
+    colAlt2 = '#dfbc86'
+    colBg = '#d37b2b'
+  }
+  col = colAlt1
+  colCirc = colAlt2
+}
+
+// function to change the season (changes color and resets canvas)
+function changeSeason() {
+  if (season == 'winter'){
+    season = 'spring'
+  } else if (season == 'spring'){
+    season = 'summer'
+  } else if (season == 'summer'){
+    season = 'fall'
+  } else if (season == 'fall'){
+    season = 'winter'
+  }
+  selectSeason()
+  resetCanvas()
+}
+
+// function to create a circle by spinning a square at one corner
+function spinSquare() {
+  buffer.push();      // start a new drawing state
+  buffer.scale(1);    // ensures dimension of shape is at 100%
+  buffer.translate(width/2,height/2);    // translate position
+  
+  // rotate the square
+  buffer.rotate(radians(deg + 45));
+  deg = deg + spin;
+  
+  // drawing the square
+  buffer.strokeWeight(4)
+  buffer.stroke(col)
+  buffer.fill(colSq);
+  buffer.rect(0,0,60,60);
+  
+  buffer.pop();      // restores original drawing state
+}
+
+// function to create the double pendulum
+function pendulum() {
+  // calculating angular acceleration of arm 1
+  let num1 = -g * (2 * m1 + m2) * sin(a1);
+  let num2 = -m2 * g * sin(a1 - 2 * a2);
+  let num3 = -2 * sin(a1 - a2) * m2;
+  let num4 = a2_v * a2_v * r2 + a1_v * a1_v * r1 * cos(a1 - a2);
+  let den = r1 * (2 * m1 + m2 - m2 * cos(2 * a1 - 2 * a2));
+  let a1_a = (num1 + num2 + num3 * num4) / den;
+
+  // calculating angular acceleration of arm 2
+  num1 = 2 * sin(a1 - a2);
+  num2 = (a1_v * a1_v * r1 * (m1 + m2));
+  num3 = g * (m1 + m2) * cos(a1);
+  num4 = a2_v * a2_v * r2 * m2 * cos(a1 - a2);
+  den = r2 * (2 * m1 + m2 - m2 * cos(2 * a1 - 2 * a2));
+  let a2_a = (num1 * (num2 + num3 + num4)) / den;
+
+  strokeWeight(4);
+
+  // setting x and y position of bob 1
+  x1 = r1 * sin(a1) + cx;
+  y1 = r1 * cos(a1) + cy;
+
+  // setting x and y position of bob 2
+  x2 = x1 + r2 * sin(a2);
+  y2 = y1 + r2 * cos(a2);
+  
+  // drawing the arms
+  stroke(colSq);
+  line(cx, cy, x1, y1);
+  line(x1, y1, x2, y2);
+  
+  // drawing the bobs
+  stroke(colCirc)
+  fill(colCirc);
+  ellipse(cx, cy, mCirc, mCirc);
+  ellipse(x1, y1, m1, m1);
+  ellipse(x2, y2, m2, m2);
+  
+  // to move mCirc along the circumference of the big circle
+  cx = width/2 + sqDiam/2 * sin(-1*radians(deg))
+  cy = height/2 + sqDiam/2 * cos(-1*radians(deg))
+  
+  // incrementing angular velocity and angle of arm
+  a1_v += a1_a;
+  a2_v += a2_a;
+  a1 += a1_v;
+  a2 += a2_v;
+}
+
+// function to create the horizontal anf vertical lines
+function drawLine() {
+  // randomness values in the positive and negative direction
+  let neg = -10
+  let pos = 10
+  
+  // drawing lines in the color and at the position of bob 2
+  if (frameCount%3 == 0) {
+    buffer.strokeWeight(0.9)
+    buffer.stroke(colCirc)
+    buffer.line(x2 + random(neg, pos), 0, x2 + random(neg, pos), width)
+    buffer.line(0, y2 + random(neg, pos), height, y2 + random(neg, pos))
+  }
+  
+   // drawing lines in the color of the background at the position of the mouse
+  if (frameCount%2 == 0) {
+    buffer.strokeWeight(0.9)
+    buffer.stroke(colBg)
+    buffer.line(mouseX, 0, mouseX, width)
+    buffer.line(0, mouseY, height, mouseY)
+  }
+}
+
+// function to perform action when mouse is pressed
+// changes the color of the rotating square's stroke and bob
+function mousePressed() {
+  if (col == colAlt2){
+    col = colAlt1
+  } else {
+    col = colAlt2;
+  } 
+  if (colCirc == colAlt1) {
+    colCirc = colAlt2
+  } else {
+    colCirc = colAlt1;
+  } 
+}
+
+function resetCanvas() {
+  buffer.background(colBg);  // reset buffer background color
+    
+  // redraw circle in the middle
+  sqDiam = sqrt(7200)*2
+  buffer.strokeWeight(4)
+  buffer.stroke(colAlt1)
+  buffer.fill(colAlt1)
+  buffer.circle(width/2,height/2, sqDiam+1);
+}
+
+// function to perform action when specific keys are pressed
+function keyPressed() {
+  // reset canvas when shift is pressed
+  if (keyCode === SHIFT) {
+    changeSeason()
+    a1 = random([-PI/2, PI/2])
+    a2 = random([-PI/2, PI/2])
+  }
+}
+
